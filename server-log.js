@@ -2,7 +2,7 @@
 
 const sleep = time => new Promise(res => setTimeout(res, time))
 
-module.exports = async () => {
+const simulate = async () => {
     console.log('https://server.urepo.com.ua:8443 is listening...')
 
     await  sleep(500)
@@ -23,22 +23,22 @@ module.exports = async () => {
     await  sleep(500)
 
     console.log('INFO | User | Unauthorized | User is accessing book with id \'2\'')
-    console.log('WARNING | User | Unauthorized | No book with id \'2\' found')
+    console.warn('WARNING | User | Unauthorized | No book with id \'2\' found')
 
     await  sleep(300)
 
     console.log('INFO | User | Unauthorized | User is accessing book with id \'3\'')
-    console.log('WARNING | User | Unauthorized | No book with id \'3\' found')
+    console.warn('WARNING | User | Unauthorized | No book with id \'3\' found')
 
     await  sleep(300)
 
     console.log('INFO | User | Unauthorized | User is accessing book with id \'4\'')
-    console.log('WARNING | User | Unauthorized | No book with id \'4\' found')
+    console.warn('WARNING | User | Unauthorized | No book with id \'4\' found')
 
     await  sleep(300)
 
     console.log('INFO | User | Unauthorized | User is accessing book with id \'-1\'')
-    console.log('ERROR | Main | Index out of bounds \'-1\'')
+    console.error('ERROR | Main | Index out of bounds \'-1\'')
 
     await  sleep(300)
 
@@ -48,3 +48,5 @@ module.exports = async () => {
 
     console.log('INFO | Main | You will never see this')
 }
+
+simulate()

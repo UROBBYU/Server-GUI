@@ -3,6 +3,7 @@
 const { promises: { appendFile }, mkdirSync, existsSync } = require('fs')
 const testLog = require('./server-log') // Loads 'server-log.js' as a module
 
+
 /**
  * Gets current Date and reassambles it to object
  * 
@@ -26,11 +27,13 @@ const getDate = () => {
     return ret
 }
 
+
 // Checks if `logs` folder exdists. If not - creates it
 if (!existsSync('logs')) mkdirSync('logs')
 
 // Log file name for current run
 const logFile = 'logs/' + getDate().toString() + '.log'
+
 
 /**
  * Writes strings to log file
@@ -47,34 +50,43 @@ const log = (...text) => {
     }
 }
 
-/**
- * Hijacks to console.log function and duplicates it's message
- * @param {string[]} message
- */
-const logHijack = message => {
-    //! <message> is an array. Do message.join('') to get a string
+
+/** Server process */
+const proc = require('child_process').fork('server-log.js', {
+    cwd: __dirname,
+    stdio: 'pipe'
+})
+
+
+/** Executes when process execution crashes. Not similar to in-process error */
+proc.on('error', err => {
+    //! If you got here, it means that rather execution file does not exist or some options were incorrect
+    //TODO: Handle server startup error
+})
+
+
+/** Executes on every console.log call. Basically main function */
+proc.stdout.on('data', data => {
+    const message = data.toString().substring(0, data.length - 1)
+
     //TODO: Your parsing code here
+
     const date = getDate()
     const time = `${date.hour}:${date.minute}:${date.second}.${date.millisecond}`
 
-    log(time, ' '.repeat(12 - time.length), ' | ', ...message)
-}
+    log(time, ' '.repeat(12 - time.length), ' | ', message)
+})
 
-{ //* This is a Main function
-    const oldLog = console.log
-    console.log = (...message) => {
-        logHijack(message)
-        oldLog.apply(console, message) // Comment this to not to log to console
-    }
 
-    testLog()
-    .then(() => {
-        console.log = oldLog
-    })
-    .catch(err => {
-        //TODO: Do something when server crashes
-        const msg = '⚠  Server crashed! ⚠\n' + err.stack
-        log('\n\n', msg, false)
-        console.error(msg)
-    })
-}
+/** Executes no every console.error or console.warn call */
+proc.stderr.on('data', data => {
+    /** @type {string} */
+    const message = data.toString().substring(0, data.length - 1)
+
+    //TODO: Your parsing code here
+
+    const date = getDate()
+    const time = `${date.hour}:${date.minute}:${date.second}.${date.millisecond}`
+
+    log(time, ' '.repeat(12 - time.length), ' | ', message)
+})
