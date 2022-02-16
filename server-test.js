@@ -1,13 +1,23 @@
 //* Log tester 📑
+//TODO: Find way to catch runtime errors
 
 const { promises: { appendFile }, mkdirSync, existsSync } = require('fs')
 const testLog = require('./server-log') // Loads 'server-log.js' as a module
 
 
 /**
+     * Adds 0 to start of the number. (34, 4) => '0034'
+     * @param {number} num 
+     * @param {number} dig 
+     */
+ const toFixedLength = (num, dig) => '0'.repeat(dig - num.toString().length) + num
+
+
+/**
  * Gets current Date and reassambles it to object
  * 
- * Also has `toString()` function, which returns it as string in format [yyyy.mm.dd - HH.MM.SS]
+ * Also has `toFull()` and `toCut()` functions,
+ * that format date to [yyyy.mm.dd - HH.MM.SS] and [HH.MM.SS.LLLL]
  */
 const getDate = () => {
     const date = new Date()
@@ -22,7 +32,17 @@ const getDate = () => {
         millisecond: date.getMilliseconds()
     }
 
-    ret.toString = () => `${ret.year}.${ret.month}.${ret.day} - ${ret.hour}.${ret.minute}.${ret.second}`
+    ret.toFull = () => toFixedLength(ret.year, 4) + '.' +
+                         toFixedLength(ret.month, 2) + '.' +
+                         toFixedLength(ret.day, 2) + ' - ' +
+                         toFixedLength(ret.hour, 2) + '.' +
+                         toFixedLength(ret.minute, 2) + '.' +
+                         toFixedLength(ret.second, 2)
+
+    ret.toCut = () => toFixedLength(ret.hour, 2) + ':' +
+                         toFixedLength(ret.minute, 2) + ':' +
+                         toFixedLength(ret.second, 2) + '.' +
+                         toFixedLength(ret.millisecond, 4)
 
     return ret
 }
@@ -32,7 +52,7 @@ const getDate = () => {
 if (!existsSync('logs')) mkdirSync('logs')
 
 // Log file name for current run
-const logFile = 'logs/' + getDate().toString() + '.log'
+const logFile = 'logs/' + getDate().toFull() + '.log'
 
 
 /**
@@ -71,10 +91,7 @@ proc.stdout.on('data', data => {
 
     //TODO: Your parsing code here
 
-    const date = getDate()
-    const time = `${date.hour}:${date.minute}:${date.second}.${date.millisecond}`
-
-    log(time, ' '.repeat(12 - time.length), ' | ', message)
+    log(getDate().toCut(), ' | ', message)
 })
 
 
@@ -85,8 +102,5 @@ proc.stderr.on('data', data => {
 
     //TODO: Your parsing code here
 
-    const date = getDate()
-    const time = `${date.hour}:${date.minute}:${date.second}.${date.millisecond}`
-
-    log(time, ' '.repeat(12 - time.length), ' | ', message)
+    log(getDate().toCut(), ' | ', message)
 })
