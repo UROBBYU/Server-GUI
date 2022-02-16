@@ -42,7 +42,7 @@ const getDate = () => {
     ret.toCut = () => toFixedLength(ret.hour, 2) + ':' +
                          toFixedLength(ret.minute, 2) + ':' +
                          toFixedLength(ret.second, 2) + '.' +
-                         toFixedLength(ret.millisecond, 4)
+                         toFixedLength(ret.millisecond, 3)
 
     return ret
 }
